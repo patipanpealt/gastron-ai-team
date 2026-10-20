@@ -703,8 +703,9 @@ export class OfficeEngine {
       const doorway = !!defOf(d).doorway;
       if (!doorway && (defOf(d).proc !== "door" || !d.mount || d.mount === "__floor__")) continue;
       const r = doorway ? null : itemRect(d);
-      const cx = r ? r.x + r.w / 2 : d.col * TILE + TILE / 2;
-      const cy = r ? r.y + r.h - 12 : WALL_H + d.row * TILE + 27;
+      const [fw, fh] = footprint(d);
+      const cx = r ? r.x + r.w / 2 : d.col * TILE + (fw * TILE) / 2;
+      const cy = r ? r.y + r.h - 12 : WALL_H + d.row * TILE + (fh - 1) * (TILE / 2) + 27;
       let near = false;
       for (const a of this.actors.values()) {
         if (!a.seated && Math.hypot(a.x - cx, a.y - cy) < 40) near = true;
@@ -1074,7 +1075,7 @@ export class OfficeEngine {
   /** The door opening of a Partition + ประตู: the whole tile, door-height, at the bottom of the panel. */
   private doorwayRect(it: PlacedItem) {
     const g = partitionGeo(it);
-    if (g.horizontal) return { x: g.face!.x, y: g.base - DOOR_H, w: TILE, h: DOOR_H };
+    if (g.horizontal) return { x: g.face!.x, y: g.base - DOOR_H, w: g.face!.w, h: DOOR_H };
     const b = g.body;
     return { x: b.x - 2, y: g.base - PART_H, w: b.w + 4, h: PART_H };
   }
@@ -1083,7 +1084,17 @@ export class OfficeEngine {
   private drawDoorway(c: CanvasRenderingContext2D, it: PlacedItem, alpha = 1) {
     const r = this.doorwayRect(it);
     if (partitionGeo(it).horizontal) {
-      this.drawDoor(c, { ...it, type: "door", mount: it.id, x: r.x, y: r.y, open: it.open }, alpha);
+      // one leaf per tile; with two the right leaf is mirrored so it reads as a double door
+      for (let i = 0; i < r.w / TILE; i++) {
+        const x = r.x + i * TILE;
+        c.save();
+        if (i % 2 === 1) {
+          c.translate(x * 2 + TILE, 0);
+          c.scale(-1, 1);
+        }
+        this.drawDoor(c, { ...it, type: "door", mount: it.id, x, y: r.y, open: it.open }, alpha);
+        c.restore();
+      }
       return;
     }
     // seen edge-on: closed shows the door's frame on the panel; open leaves two posts and the lintel

@@ -40,7 +40,7 @@ const RUG_COLORS = ["#8c3b4a", "#2f8a84", "#5b6f8a", "#c2873a", "#6a4fa0", "#3f7
 /** Fields a freshly picked catalog item starts with (the ones you can adjust before dropping it). */
 function startProps(type: string): Partial<PlacedItem> {
   const def = ITEM_BY_TYPE[type];
-  if (def.proc === "partition") return { len: def.doorway ? 1 : 4, style: "solid", color: PARTITION_COLORS[0] };
+  if (def.proc === "partition") return { len: def.doorway ? 2 : 4, style: "solid", color: PARTITION_COLORS[0] };
   if (def.proc === "plaque") return { text: "ชื่อทีม", style: "wood", size: "s" };
   return {};
 }
@@ -150,7 +150,17 @@ export function RoomEditor({ edit, setEdit, onDone }: { edit: EditState; setEdit
       return (
         <>
           {d.doorway ? (
-            <p className="muted small">ประตูเปิดเองเมื่อมีคนเดินผ่าน วางต่อกับแผ่น partition แบบเดียวกันได้</p>
+            <div className="field">
+              <span>ความกว้างประตู</span>
+              <div className="seg seg-small">
+                {[1, 2].map((n) => (
+                  <button key={n} className={(cur.len === 1 ? 1 : 2) === n ? "on" : ""} onClick={() => change({ len: n })}>
+                    {n} ช่อง
+                  </button>
+                ))}
+              </div>
+              <span className="muted small">ประตูเปิดเองเมื่อมีคนเดินผ่าน วางต่อกับแผ่น partition แบบเดียวกันได้</span>
+            </div>
           ) : (
           <div className="field">
             <span>ความยาว {cur.len ?? 4} ช่อง</span>

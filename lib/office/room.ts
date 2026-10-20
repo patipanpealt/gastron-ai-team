@@ -115,7 +115,9 @@ export const PART_H = 84; // height of the front face
 export const PART_TOP = 12; // visible depth of the top edge (horizontal panels)
 export const PART_SIDE = 14; // thickness of a vertical panel
 
-export const partLen = (item: PlacedItem) => (defOf(item)?.doorway ? 1 : Math.min(16, Math.max(1, Math.round(item.len ?? 4))));
+// a doorway is 1 or 2 tiles wide (new ones are 2; ones placed before kept their 1)
+export const partLen = (item: PlacedItem) =>
+  defOf(item)?.doorway ? (item.len === 1 ? 1 : 2) : Math.min(16, Math.max(1, Math.round(item.len ?? 4)));
 
 export interface PartGeo {
   horizontal: boolean;
@@ -302,7 +304,7 @@ export function blockedGrid(room: RoomLayout): boolean[][] {
   }
   // a door lets agents through the tile of the panel it is set into (it opens by itself when someone arrives)
   for (const it of room.items) {
-    if (defOf(it)?.doorway && it.row >= 0 && it.row < room.rows && it.col >= 0 && it.col < room.cols) g[it.row][it.col] = false;
+    if (defOf(it)?.doorway) for (const [c, r] of cellsOf(it)) if (r >= 0 && r < room.rows && c >= 0 && c < room.cols) g[r][c] = false;
   }
   for (const it of room.items) {
     if (defOf(it)?.proc !== "door") continue; // doors in a partition are automatic: agents open them as they walk through
