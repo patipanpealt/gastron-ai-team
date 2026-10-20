@@ -95,6 +95,8 @@ const BUBBLE_EDGE: Record<BubbleKind, string> = { think: "#111111", work: "#1111
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const center = (t: Tile): Pt => ({ x: t.c * TILE + TILE / 2, y: WALL_H + t.r * TILE + 27 });
+const DOOR_SPRITE = { w: 36, h: 60 }; // public/assets/furniture/door.png
+const DOOR_SCALE = 1.25;
 const appr = (s: SeatInfo): Tile => ({ c: s.approach.col, r: s.approach.row });
 const dirFromVec = (dx: number, dy: number): Dir => (Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "E" : "W") : dy > 0 ? "S" : "N");
 
@@ -1075,7 +1077,14 @@ export class OfficeEngine {
   /** The door opening of a Partition + ประตู: the whole tile, door-height, at the bottom of the panel. */
   private doorwayRect(it: PlacedItem) {
     const g = partitionGeo(it);
-    if (g.horizontal) return { x: g.face!.x, y: g.base - DOOR_H, w: g.face!.w, h: DOOR_H };
+    if (g.horizontal) {
+      const f = g.face!;
+      if (f.w < 2 * TILE) return { x: f.x, y: g.base - DOOR_H, w: TILE, h: DOOR_H };
+      // one big door in the middle, drawn from the original door sprite (36x60) at 1.25x: 45x75
+      const w = Math.round(DOOR_SPRITE.w * DOOR_SCALE);
+      const h = Math.round(DOOR_SPRITE.h * DOOR_SCALE);
+      return { x: Math.round(f.x + (f.w - w) / 2), y: g.base - h, w, h };
+    }
     const b = g.body;
     return { x: b.x - 2, y: g.base - PART_H, w: b.w + 4, h: PART_H };
   }
@@ -1084,17 +1093,14 @@ export class OfficeEngine {
   private drawDoorway(c: CanvasRenderingContext2D, it: PlacedItem, alpha = 1) {
     const r = this.doorwayRect(it);
     if (partitionGeo(it).horizontal) {
-      // one leaf per tile; with two the right leaf is mirrored so it reads as a double door
-      for (let i = 0; i < r.w / TILE; i++) {
-        const x = r.x + i * TILE;
+      const big = r.w > TILE;
+      const img = big ? furnitureImage("door") : null;
+      if (big && img && !this.isDoorOpen(it)) {
         c.save();
-        if (i % 2 === 1) {
-          c.translate(x * 2 + TILE, 0);
-          c.scale(-1, 1);
-        }
-        this.drawDoor(c, { ...it, type: "door", mount: it.id, x, y: r.y, open: it.open }, alpha);
+        c.globalAlpha = alpha;
+        c.drawImage(img, r.x, r.y, r.w, r.h);
         c.restore();
-      }
+      } else this.drawDoor(c, { ...it, type: "door", mount: it.id, x: r.x, y: r.y, open: it.open }, alpha, r);
       return;
     }
     // seen edge-on: closed shows the door's frame on the panel; open leaves two posts and the lintel
@@ -1156,10 +1162,10 @@ export class OfficeEngine {
   }
 
   /** A door: shut it is a wooden panel, open it is a doorway with the leaf swung back. */
-  private drawDoor(c: CanvasRenderingContext2D, it: PlacedItem, alpha = 1) {
-    const { w, h } = wallSize(it);
-    const x = it.x ?? 0;
-    const y = it.y ?? 0;
+  private drawDoor(c: CanvasRenderingContext2D, it: PlacedItem, alpha = 1, box?: { x: number; y: number; w: number; h: number }) {
+    const { w, h } = box ?? wallSize(it);
+    const x = box?.x ?? it.x ?? 0;
+    const y = box?.y ?? it.y ?? 0;
     const onPanel = !!it.mount && it.mount !== "__floor__";
     const OL = "#2b2230";
     const wood = "#c98a4b";
