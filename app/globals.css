@@ -1130,9 +1130,26 @@ input:focus {
   padding: 28px;
 }
 
-.login-card h1 {
+.login-logo {
+  width: min(260px, 80%);
+  height: auto;
+  margin: 4px auto 0;
+}
+
+.login-tagline {
   font-family: var(--font-pix);
-  font-size: 24px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--wood-outline, #4a3223);
+  margin-bottom: 6px !important;
+}
+
+.login-card input {
+  padding: 9px 11px;
+  border: 2px solid #6b4a2f;
+  border-radius: 6px;
+  font: inherit;
+  background: #fffaf0;
 }
 
 .login-card p {
@@ -1775,3 +1792,7 @@ kbd {
 .ref p { margin: 0; }
 .ref-sum summary { cursor: pointer; font-size: 0.85rem; }
 .link-btn { background: none; border: none; color: #26324f; text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
+
+/* signed-in user chip in the top bar */
+.account { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+.account b { font-weight: 700; }

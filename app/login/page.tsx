@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -11,27 +12,33 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (res.ok) {
+        window.location.href = "/";
+        return;
+      }
+      setError(((await res.json()) as { error?: string }).error || "เข้าสู่ระบบไม่สำเร็จ");
+    } catch {
+      setError("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    }
     setLoading(false);
-    if (res.ok) window.location.href = "/";
-    else setError(((await res.json()) as { error?: string }).error || "เข้าสู่ระบบไม่สำเร็จ");
   }
 
   return (
     <div className="login">
       <form className="wood login-card" onSubmit={submit}>
-        <h1>
-          <span className="g-red">GAS</span>
-          <span className="g-green">TRON</span>
-        </h1>
-        <p className="muted">ใส่รหัสผ่านของทีมเพื่อเข้า AI Office</p>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="รหัสผ่านทีม" autoFocus />
-        <button className="btn btn-green" disabled={!password || loading}>
-          {loading ? "กำลังตรวจสอบ…" : "▶ เข้าออฟฟิศ"}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="login-logo" src="/brand/gastron-logo.svg" alt="GASTRON" />
+        <p className="login-tagline">AI Marketing Creative Team</p>
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="อีเมล" autoComplete="username" autoFocus required />
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="รหัสผ่าน" autoComplete="current-password" required />
+        <button className="btn btn-green" disabled={!email || !password || loading}>
+          {loading ? "กำลังตรวจสอบ…" : "▶ เข้าสู่ระบบ"}
         </button>
         {error && <p className="err">{error}</p>}
       </form>

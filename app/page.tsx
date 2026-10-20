@@ -78,6 +78,13 @@ export default function OfficePage() {
   const [edit, setEditState] = useState<EditState>({ active: false, placing: null, selectedId: null });
   const [charEditor, setCharEditor] = useState<AgentId | null>(null);
   const [showMemory, setShowMemory] = useState(false);
+  const [me, setMe] = useState<{ email: string; role: string } | null>(null);
+  useEffect(() => {
+    void fetch("/api/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { email?: string; role?: string } | null) => d?.email && setMe({ email: d.email, role: d.role ?? "member" }))
+      .catch(() => undefined);
+  }, []);
   const setEdit = useCallback((patch: Partial<EditState>) => setEditState((e) => ({ ...e, ...patch })), []);
   const phaseLabel = (p: Phase) =>
     p === "planning" ? `${profiles.director.name} กำลังวางแผน` : p === "compiling" ? `${profiles.director.name} กำลังรวมงาน` : PHASE_LABEL[p];
@@ -168,6 +175,17 @@ export default function OfficePage() {
           )}
           {status && !status.demo && <span className="tag-wood">{status.model}</span>}
           {run && <span className={`tag-wood phase-${run.phase}`}>{phaseLabel(run.phase)}</span>}
+          {me && (
+            <span className="tag-wood account" title={`ล็อกอินเป็น ${me.email}`}>
+              <b>{me.role === "admin" ? "👑" : "👤"}</b> {me.email}
+              <button
+                className="link-btn"
+                onClick={() => void fetch("/api/logout", { method: "POST" }).then(() => (window.location.href = "/login"))}
+              >
+                ออกจากระบบ
+              </button>
+            </span>
+          )}
         </div>
       </header>
 

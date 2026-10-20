@@ -18,3 +18,5 @@ pixel-art/sprites/_v1/
 pixel-art/sprites/character32/
 **/preview/
 skill-pack/*.zip
+
+.env.vercel

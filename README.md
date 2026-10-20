@@ -96,3 +96,7 @@ Under the brief box, **🔗 Reference** takes up to 6 links, each with a note. T
 ## OmniRoute
 
 Set `OMNIROUTE_KEY` (and optionally `OMNIROUTE_MODEL`, e.g. a combo name) and the app talks to a local OmniRoute (`lib/omniroute.ts`, OpenAI-compatible `/v1/chat/completions`). OmniRoute can fall back between providers/models when a free quota runs out. Never commit `.env.local`.
+
+## Login
+
+Email + password login (`/login`, `lib/auth.ts`, `lib/password.ts`). Users come from `AUTH_USERS` (JSON with scrypt hashes, never plain passwords) and the session cookie is signed with `AUTH_SECRET`. Roles: `admin`, `member`. With `AUTH_USERS` empty the app is open (local dev).
