@@ -1,0 +1,174 @@
+{
+  "meeting_h": [
+    {
+      "id": "N1",
+      "chair": "chair_front",
+      "x": 16,
+      "y": -22,
+      "layer": "behind"
+    },
+    {
+      "id": "N2",
+      "chair": "chair_front",
+      "x": 48,
+      "y": -22,
+      "layer": "behind"
+    },
+    {
+      "id": "N3",
+      "chair": "chair_front",
+      "x": 80,
+      "y": -22,
+      "layer": "behind"
+    },
+    {
+      "id": "N4",
+      "chair": "chair_front",
+      "x": 112,
+      "y": -22,
+      "layer": "behind"
+    },
+    {
+      "id": "N5",
+      "chair": "chair_front",
+      "x": 144,
+      "y": -22,
+      "layer": "behind"
+    },
+    {
+      "id": "S1",
+      "chair": "chair_back",
+      "x": 16,
+      "y": 53,
+      "layer": "front"
+    },
+    {
+      "id": "S2",
+      "chair": "chair_back",
+      "x": 48,
+      "y": 53,
+      "layer": "front"
+    },
+    {
+      "id": "S3",
+      "chair": "chair_back",
+      "x": 80,
+      "y": 53,
+      "layer": "front"
+    },
+    {
+      "id": "S4",
+      "chair": "chair_back",
+      "x": 112,
+      "y": 53,
+      "layer": "front"
+    },
+    {
+      "id": "S5",
+      "chair": "chair_back",
+      "x": 144,
+      "y": 53,
+      "layer": "front"
+    },
+    {
+      "id": "W",
+      "chair": "chair_right",
+      "x": -16,
+      "y": 8,
+      "layer": "behind"
+    },
+    {
+      "id": "E",
+      "chair": "chair_left",
+      "x": 176,
+      "y": 8,
+      "layer": "behind"
+    }
+  ],
+  "meeting_v": [
+    {
+      "id": "W1",
+      "chair": "chair_right",
+      "x": -20,
+      "y": 4,
+      "layer": "behind"
+    },
+    {
+      "id": "W2",
+      "chair": "chair_right",
+      "x": -20,
+      "y": 36,
+      "layer": "behind"
+    },
+    {
+      "id": "W3",
+      "chair": "chair_right",
+      "x": -20,
+      "y": 68,
+      "layer": "behind"
+    },
+    {
+      "id": "W4",
+      "chair": "chair_right",
+      "x": -20,
+      "y": 100,
+      "layer": "behind"
+    },
+    {
+      "id": "W5",
+      "chair": "chair_right",
+      "x": -20,
+      "y": 132,
+      "layer": "behind"
+    },
+    {
+      "id": "E1",
+      "chair": "chair_left",
+      "x": 56,
+      "y": 4,
+      "layer": "behind"
+    },
+    {
+      "id": "E2",
+      "chair": "chair_left",
+      "x": 56,
+      "y": 36,
+      "layer": "behind"
+    },
+    {
+      "id": "E3",
+      "chair": "chair_left",
+      "x": 56,
+      "y": 68,
+      "layer": "behind"
+    },
+    {
+      "id": "E4",
+      "chair": "chair_left",
+      "x": 56,
+      "y": 100,
+      "layer": "behind"
+    },
+    {
+      "id": "E5",
+      "chair": "chair_left",
+      "x": 56,
+      "y": 132,
+      "layer": "behind"
+    },
+    {
+      "id": "N",
+      "chair": "chair_front",
+      "x": 18,
+      "y": -24,
+      "layer": "behind"
+    },
+    {
+      "id": "S",
+      "chair": "chair_back",
+      "x": 18,
+      "y": 179,
+      "layer": "front"
+    }
+  ]
+}

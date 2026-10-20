@@ -1,0 +1,80 @@
+{
+  "frameLayout": "same cells as character/anim/body16_anim.json (4 columns x 20 rows)",
+  "drawOrder": [
+    "hair back",
+    "body",
+    "face",
+    "hair front"
+  ],
+  "file": "hair16_<style>_<color>.png, back layer: hair16_<style>_<color>_back.png",
+  "colors": {
+    "black": [
+      "#6c6890",
+      "#4a4668",
+      "#35324f",
+      "#24223a"
+    ],
+    "brown": [
+      "#b07a50",
+      "#8a5634",
+      "#683e22",
+      "#4a2a16"
+    ],
+    "blonde": [
+      "#fff0b0",
+      "#f4cc70",
+      "#d8a44c",
+      "#b07e34"
+    ],
+    "auburn": [
+      "#e8805a",
+      "#bc5232",
+      "#923822",
+      "#682416"
+    ],
+    "pink": [
+      "#ffd0e0",
+      "#f79cbc",
+      "#dc7298",
+      "#b45276"
+    ]
+  },
+  "styles": {
+    "short": {
+      "name": "Short Crop",
+      "gender": "male",
+      "defaultColor": "black",
+      "hasBack": false
+    },
+    "spiky": {
+      "name": "Spiky",
+      "gender": "male",
+      "defaultColor": "brown",
+      "hasBack": false
+    },
+    "sidepart": {
+      "name": "Side Swept",
+      "gender": "male",
+      "defaultColor": "auburn",
+      "hasBack": false
+    },
+    "bob": {
+      "name": "Bob",
+      "gender": "female",
+      "defaultColor": "black",
+      "hasBack": false
+    },
+    "long": {
+      "name": "Long Straight",
+      "gender": "female",
+      "defaultColor": "brown",
+      "hasBack": true
+    },
+    "bun": {
+      "name": "High Bun",
+      "gender": "female",
+      "defaultColor": "blonde",
+      "hasBack": false
+    }
+  }
+}

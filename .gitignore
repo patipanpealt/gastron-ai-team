@@ -1,0 +1,20 @@
+node_modules
+.next
+.env*.local
+.env
+.vercel
+next-env.d.ts
+*.tsbuildinfo
+
+# local / junk
+.DS_Store
+._*
+.claude/
+
+# reference images from other artists (not ours to publish) and old experiments
+Ref/
+_archive/
+pixel-art/sprites/_v1/
+pixel-art/sprites/character32/
+**/preview/
+skill-pack/*.zip

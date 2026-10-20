@@ -1,0 +1,67 @@
+{
+  "canvas": [
+    32,
+    48
+  ],
+  "anchor_feet": [
+    16,
+    46
+  ],
+  "parts": {
+    "head": [
+      9,
+      2,
+      23,
+      16
+    ],
+    "ears": [
+      7,
+      8,
+      25,
+      12
+    ],
+    "neck": [
+      14,
+      16,
+      19,
+      18
+    ],
+    "torso": [
+      8,
+      18,
+      25,
+      33
+    ],
+    "arms": [
+      7,
+      22,
+      26,
+      31
+    ],
+    "hands": [
+      6,
+      31,
+      27,
+      34
+    ],
+    "legs": [
+      12,
+      33,
+      21,
+      44
+    ],
+    "feet": [
+      11,
+      44,
+      22,
+      46
+    ],
+    "face": [
+      10,
+      7,
+      22,
+      15
+    ]
+  },
+  "note": "Draw each clothing / hair / face layer on its own 32x48 transparent canvas and stack it on top."
+}
