@@ -29,8 +29,8 @@ export function MemoryPanel({ onClose }: { onClose: () => void }) {
       <div className="modal memory-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="ฝึก AI">
         <div className="drawer-head">
           <div>
-            <h2>🧠 ความจำ &amp; ฝึก AI</h2>
-            <p className="muted small">สอนทีมครั้งเดียว ทีมจะจำและทำตามทุกงานต่อจากนี้ เก็บไว้ในเบราว์เซอร์เครื่องนี้ (ไม่ได้ส่งขึ้นเซิร์ฟเวอร์ถาวร แต่แนบไปกับคำขอ AI ทุกครั้ง)</p>
+            <h2>สอนทีม</h2>
+            <p className="muted small">สิ่งที่สอนไว้จะใช้กับทุกงานต่อจากนี้ เก็บในเบราว์เซอร์เครื่องนี้ และแนบไปกับทุกคำขอ AI</p>
           </div>
           <button className="btn-x" onClick={onClose} aria-label="ปิด">
             ✕
@@ -128,7 +128,7 @@ export function TeachBox() {
   const [saved, setSaved] = useState(false);
   return (
     <div className="teach-box">
-      <b>🧠 สอนทีมจากงานนี้</b>
+      <b>สอนทีมจากงานนี้</b>
       <div className="memory-row">
         <select value={kind} onChange={(e) => setKind(e.target.value as MemoryKind)}>
           <option value="feedback">ข้อติ / ครั้งหน้าอยากให้ทำต่าง</option>
@@ -157,7 +157,7 @@ export function TeachBox() {
       >
         จำไว้ให้ทั้งทีม
       </button>
-      {saved && <span className="muted small"> ✓ บันทึกแล้ว ดูหรือแก้ได้ที่ปุ่ม “🧠 ฝึก AI”</span>}
+      {saved && <span className="muted small"> ✓ บันทึกแล้ว แก้ได้ที่ปุ่ม “สอนทีม”</span>}
     </div>
   );
 }

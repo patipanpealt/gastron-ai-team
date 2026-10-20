@@ -38,7 +38,7 @@ export default function LoginPage() {
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="อีเมล" autoComplete="username" autoFocus required />
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="รหัสผ่าน" autoComplete="current-password" required />
         <button className="btn btn-green" disabled={!email || !password || loading}>
-          {loading ? "กำลังตรวจสอบ…" : "▶ เข้าสู่ระบบ"}
+          {loading ? "กำลังตรวจสอบ…" : "เข้าสู่ระบบ"}
         </button>
         {error && <p className="err">{error}</p>}
       </form>

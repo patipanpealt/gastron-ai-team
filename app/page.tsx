@@ -161,10 +161,10 @@ export default function OfficePage() {
           <span className="sign-post" aria-hidden />
           <div className="sign-board">
             <h1>
-              <span className="g-red">GAS</span>
-              <span className="g-green">TRON</span> <span className="sign-sub">AI OFFICE</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="sign-logo" src="/brand/gastron-logo.svg" alt="GASTRON" /> <span className="sign-sub">AI OFFICE</span>
             </h1>
-            <p>ทีมการตลาด AI 11 ตำแหน่ง · คิด Graphic Brief และแคมเปญร่วมกันแบบเรียลไทม์</p>
+            <p>ทีมการตลาด 11 คน ช่วยคิด brief โพสต์ และแคมเปญ</p>
           </div>
         </div>
         <div className="topbar-right">
@@ -193,7 +193,7 @@ export default function OfficePage() {
         <section className="stage">
           <div className="stage-tools">
             <button className="btn" onClick={() => setCharEditor(selected ?? "director")}>
-              🧑‍🎨 แต่งตัว &amp; ตั้งชื่อ
+              แต่งตัว &amp; ตั้งชื่อ
             </button>
             <button
               className={`btn ${edit.active ? "btn-green" : ""}`}
@@ -204,10 +204,10 @@ export default function OfficePage() {
               disabled={active}
               title={active ? "รอทีมทำงานเสร็จก่อนจึงจะแต่งห้องได้" : undefined}
             >
-              🏠 {edit.active ? "กำลังแต่งห้อง" : "แต่งห้อง"}
+              {edit.active ? "กำลังแต่งห้อง" : "แต่งห้อง"}
             </button>
             <button className="btn" onClick={() => setShowMemory(true)}>
-              🧠 ฝึก AI
+              สอนทีม
             </button>
           </div>
           <div className="frame">
@@ -272,24 +272,24 @@ export default function OfficePage() {
 
         <aside className="side">
           <div className="wood brief-panel">
-            <h2>📜 สั่งงานทีม</h2>
+            <h2>สั่งงานทีม</h2>
             <div className="seg" role="tablist" aria-label="ประเภทงาน">
               <button role="tab" aria-selected={kind === "graphic"} className={kind === "graphic" ? "on" : ""} onClick={() => setKind("graphic")} disabled={active}>
-                🎨 Graphic Brief
+                Graphic Brief
               </button>
               <button role="tab" aria-selected={kind === "facebook"} className={kind === "facebook" ? "on" : ""} onClick={() => setKind("facebook")} disabled={active}>
-                💬 โพสต์ Facebook
+                โพสต์ Facebook
               </button>
               <button role="tab" aria-selected={kind === "campaign"} className={kind === "campaign" ? "on" : ""} onClick={() => setKind("campaign")} disabled={active}>
-                📣 แคมเปญ / คอนเทนต์
+                แคมเปญ / คอนเทนต์
               </button>
             </div>
             <p className="hint">
               {kind === "graphic"
-                ? "ทีมจะช่วยกันคิด brief ส่งดีไซเนอร์: copy บนชิ้นงาน, visual direction, สี, layout wireframe, ขนาด และ AI prompt"
+                ? "ได้ brief พร้อมส่งดีไซเนอร์: ข้อความบนชิ้นงาน สี layout และขนาด"
                 : kind === "facebook"
-                  ? "ทีมจะนั่งคุยกันจริง ๆ ในห้องประชุม: header, เนื้อหา, layout ให้กราฟิก, แคปชัน และแคมเปญเล็ก ๆ — คุณพิมพ์แทรกได้ระหว่างคุย"
-                  : "ทีมจะวางแผนแคมเปญครบ: กลยุทธ์, คอนเทนต์, โฆษณา, SEO และแผนวัดผล"}
+                  ? "ทีมคุยกันในห้องประชุมจนได้ header, layout และแคปชัน พิมพ์แทรกได้ระหว่างคุย"
+                  : "ได้แผนแคมเปญตั้งแต่กลยุทธ์ คอนเทนต์ โฆษณา ไปจนถึงการวัดผล"}
             </p>
             <textarea
               value={brief}
@@ -309,7 +309,7 @@ export default function OfficePage() {
             />
             {!active && (
               <div className="refs">
-                <span className="mini-label">🔗 Reference (แปะลิงก์ แล้วพิมพ์ในช่องบรีฟว่า “ตาม Reference 1” ได้):</span>
+                <span className="mini-label">Reference · อ้างในบรีฟได้ เช่น “ตาม Reference 1”</span>
                 {refs.map((r, i) => (
                   <div key={r.id} className={`ref ref-${r.status}`}>
                     <div className="ref-top">
@@ -325,7 +325,7 @@ export default function OfficePage() {
                       </button>
                     </div>
                     <input value={r.note} placeholder={`รายละเอียด: Reference ${i + 1} คืออะไร ให้ดูอะไรจากมัน…`} maxLength={400} onChange={(e) => patchRef(r.id, { note: e.target.value })} />
-                    {r.status === "reading" && <p className="muted small">⏳ กำลังอ่านลิงก์และสรุป…</p>}
+                    {r.status === "reading" && <p className="muted small">กำลังอ่านลิงก์…</p>}
                     {r.status === "fail" && (
                       <p className="err small">
                         ⚠️ {r.problem}{" "}
@@ -336,7 +336,7 @@ export default function OfficePage() {
                     )}
                     {r.status === "ok" && (
                       <details className="ref-sum">
-                        <summary>✅ AI อ่านแล้ว — ดู/แก้สรุป</summary>
+                        <summary>อ่านแล้ว ดูหรือแก้สรุป</summary>
                         <textarea value={r.summary} rows={5} onChange={(e) => patchRef(r.id, { summary: e.target.value })} />
                         <button className="link-btn" onClick={() => void readRef(r)}>
                           อ่านใหม่
@@ -388,7 +388,7 @@ export default function OfficePage() {
               )}
               {run?.final.output && (
                 <button className="btn" onClick={() => setShowFinal(true)}>
-                  {run.kind === "graphic" ? "🎨 ดู Graphic Brief" : run.kind === "facebook" ? "📘 ดู Facebook Post Brief" : "📦 ดู Deliverable"}
+                  {run.kind === "graphic" ? "ดู Graphic Brief" : run.kind === "facebook" ? "ดู Facebook Post Brief" : "ดูงานที่เสร็จ"}
                 </button>
               )}
             </div>
@@ -397,7 +397,7 @@ export default function OfficePage() {
 
           {run && run.kind === "facebook" && (
             <div className="wood chat-panel">
-              <h2>💬 ห้องประชุม</h2>
+              <h2>ห้องประชุม</h2>
               <div className="chat" ref={chatRef}>
                 {(run.chat ?? []).map((c, i) => {
                   const a = c.agent === "user" ? null : AGENT_BY_ID[c.agent];
@@ -420,7 +420,7 @@ export default function OfficePage() {
                     setChatText("");
                   }}
                 >
-                  <input value={chatText} onChange={(e) => setChatText(e.target.value)} placeholder="พิมพ์แทรกวงสนทนา เช่น อยากให้ header สั้นกว่านี้…" maxLength={500} />
+                  <input value={chatText} onChange={(e) => setChatText(e.target.value)} placeholder="พิมพ์แทรก เช่น อยากให้ header สั้นกว่านี้" maxLength={500} />
                   <button className="btn btn-green" disabled={!chatText.trim()}>
                     ส่ง
                   </button>
@@ -431,7 +431,7 @@ export default function OfficePage() {
 
           {run && run.tasks.length > 0 && (
             <div className="wood tasks-panel">
-              <h2>🗂️ บอร์ดงาน</h2>
+              <h2>บอร์ดงาน</h2>
               {run.summary && <p className="summary">{run.summary}</p>}
               <ol className="tasks">
                 {run.tasks.map((t) => {
@@ -468,9 +468,9 @@ export default function OfficePage() {
           )}
 
           <div className="wood feed-panel">
-            <h2>📡 ความเคลื่อนไหวในออฟฟิศ</h2>
+            <h2>ในออฟฟิศตอนนี้</h2>
             <div className="feed" ref={feedRef}>
-              {!run && <p className="muted">ยังเงียบอยู่… ส่ง brief ให้ทีมเพื่อเริ่มงาน หรือคลิกที่ตัวละครเพื่อดูโปรไฟล์</p>}
+              {!run && <p className="muted">ยังไม่มีงาน ส่ง brief หรือคลิกตัวละครเพื่อดูโปรไฟล์</p>}
               {run?.feed.map((f, i) => {
                 const a = AGENT_BY_ID[f.agent];
                 return (
@@ -487,7 +487,7 @@ export default function OfficePage() {
 
           {history.length > 0 && !active && (
             <div className="wood history-panel">
-              <h2>🗄️ งานที่ผ่านมา (เครื่องนี้)</h2>
+              <h2>งานที่ผ่านมา</h2>
               <ul className="history">
                 {history.map((h) => (
                   <li key={h.id}>
@@ -588,7 +588,7 @@ function AgentDrawer({ id, run, onClose, onEdit }: { id: AgentId; run: RunState 
 function Thinking({ text }: { text: string }) {
   return (
     <details className="thinking">
-      <summary>💭 ความคิดระหว่างทำงาน</summary>
+      <summary>ความคิดระหว่างทำงาน</summary>
       <p>{text}</p>
     </details>
   );
@@ -627,7 +627,7 @@ function FinalModal({ run, onClose }: { run: RunState; onClose: () => void }) {
       <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Deliverable">
         <div className="drawer-head">
           <div>
-            <h2>{run.kind === "graphic" ? "🎨 Graphic Brief" : run.kind === "facebook" ? "📘 Facebook Post Brief" : "📦 Deliverable"}</h2>
+            <h2>{run.kind === "graphic" ? "Graphic Brief" : run.kind === "facebook" ? "Facebook Post Brief" : "งานที่เสร็จ"}</h2>
             <p className="muted small">Brief: {run.brief}</p>
           </div>
           <div className="modal-actions">
@@ -646,7 +646,7 @@ function FinalModal({ run, onClose }: { run: RunState; onClose: () => void }) {
               ⬇ .md
             </button>
             <button className="btn btn-green" onClick={() => void savePdf()} disabled={pdfBusy}>
-              {pdfBusy ? "⏳ กำลังสร้าง PDF…" : "⬇ ดาวน์โหลด PDF"}
+              {pdfBusy ? "กำลังสร้าง PDF…" : "ดาวน์โหลด PDF"}
             </button>
             <button className="btn-x" onClick={onClose} aria-label="ปิด">
               ✕

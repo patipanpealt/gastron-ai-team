@@ -1,3 +1,4 @@
+/* Hallmark · redesign (refine) · genre: playful · theme: custom (existing wood-pixel system kept) · tone: friendly-professional Thai */
 /* Cozy wooden pixel UI (Sprout Lands inspired) */
 :root {
   --ink: #4a2c1a;
@@ -19,6 +20,9 @@
   --g-green: #009143;
   --blue: #3a7bc8;
   --purple: #7a4fb0;
+  --field: #fffaf0; /* text inputs */
+  --navy: #26324f;
+  --rule-brown: #6b4a2f;
   --font-body: var(--font-thai), system-ui, sans-serif;
   --font-pix: var(--font-pixel), var(--font-thai), monospace;
 }
@@ -989,7 +993,7 @@ input:focus {
 }
 
 .md td {
-  background: #fffaf0;
+  background: var(--field);
 }
 
 .md blockquote {
@@ -1146,10 +1150,10 @@ input:focus {
 
 .login-card input {
   padding: 9px 11px;
-  border: 2px solid #6b4a2f;
+  border: 2px solid var(--rule-brown);
   border-radius: 6px;
   font: inherit;
-  background: #fffaf0;
+  background: var(--field);
 }
 
 .login-card p {
@@ -1213,7 +1217,7 @@ input:focus {
   gap: 12mm;
   padding: 7mm 8mm;
   margin-bottom: 5mm;
-  background: #26324f;
+  background: var(--navy);
   color: #fff;
   border-left: 3mm solid #d70010;
   border-radius: 1.5mm;
@@ -1255,7 +1259,7 @@ input:focus {
   margin: 6mm 0 2.5mm;
   padding: 1.6mm 3mm;
   font-size: 12pt;
-  color: #26324f;
+  color: var(--navy);
   background: #eef2f8;
   border-left: 1.6mm solid #009143;
   border-radius: 0.8mm;
@@ -1264,7 +1268,7 @@ input:focus {
 .print-doc .md h3 {
   margin: 3mm 0 1mm;
   font-size: 10.5pt;
-  color: #26324f;
+  color: var(--navy);
   break-after: avoid;
 }
 .print-doc .md p,
@@ -1280,7 +1284,7 @@ input:focus {
   break-inside: avoid;
 }
 .print-doc .md th {
-  background: #26324f;
+  background: var(--navy);
   color: #fff;
   text-align: left;
   padding: 1.6mm 2.4mm;
@@ -1763,36 +1767,40 @@ kbd {
 .chat-user { background: rgba(0, 145, 67, 0.16); }
 .chat-role { margin-left: 6px; font-size: 0.75rem; opacity: 0.65; }
 .chat-form { display: flex; gap: 6px; margin-top: 8px; }
-.chat-form input { flex: 1; min-width: 0; padding: 6px 8px; border: 2px solid #6b4a2f; border-radius: 6px; font: inherit; }
+.chat-form input { flex: 1; min-width: 0; padding: 6px 8px; border: 2px solid var(--rule-brown); border-radius: 6px; font: inherit; }
 
 /* memory / teaching the team */
 .memory-modal { width: min(760px, 100%); }
 .memory-body { padding: 14px; overflow-y: auto; }
-.memory-form textarea, .memory-list textarea, .teach-box textarea { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 2px solid #6b4a2f; border-radius: 6px; font: inherit; background: #fffaf0; }
+.memory-form textarea, .memory-list textarea, .teach-box textarea { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 2px solid var(--rule-brown); border-radius: 6px; font: inherit; background: var(--field); }
 .memory-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
 .memory-row label { display: flex; flex-direction: column; gap: 2px; font-size: 0.8rem; }
-.memory-row select, .teach-box select { padding: 5px 8px; border: 2px solid #6b4a2f; border-radius: 6px; font: inherit; background: #fffaf0; }
+.memory-row select, .teach-box select { padding: 5px 8px; border: 2px solid var(--rule-brown); border-radius: 6px; font: inherit; background: var(--field); }
 .memory-actions { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
 .memory-list { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }
 .memory-list li { background: rgba(255, 255, 255, 0.5); border-radius: 8px; padding: 8px; }
 .memory-off { opacity: 0.5; }
 .memory-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
 .memory-toggle { margin-left: auto; font-size: 0.8rem; display: flex; gap: 4px; align-items: center; }
-.teach-box { margin-top: 18px; padding: 12px; border: 2px dashed #6b4a2f; border-radius: 8px; background: rgba(255, 255, 255, 0.45); display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.teach-box { margin-top: 18px; padding: 12px; border: 2px dashed var(--rule-brown); border-radius: 8px; background: rgba(255, 255, 255, 0.45); display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 @media print { .teach-box { display: none; } }
 
 /* reference links in the brief panel */
 .refs { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; align-items: flex-start; }
-.ref { width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.5); border: 2px solid #6b4a2f; border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; gap: 5px; }
-.ref input, .ref textarea { width: 100%; box-sizing: border-box; padding: 5px 8px; border: 2px solid #8a6a4a; border-radius: 6px; font: inherit; background: #fffaf0; }
+.ref { width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.5); border: 2px solid var(--rule-brown); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; gap: 5px; }
+.ref input, .ref textarea { width: 100%; box-sizing: border-box; padding: 5px 8px; border: 2px solid #8a6a4a; border-radius: 6px; font: inherit; background: var(--field); }
 .ref-top { display: flex; gap: 6px; align-items: center; }
-.ref-n { background: #26324f; color: #fff; border-radius: 50%; min-width: 22px; height: 22px; display: grid; place-items: center; font-size: 0.8rem; }
+.ref-n { background: var(--navy); color: #fff; border-radius: 50%; min-width: 22px; height: 22px; display: grid; place-items: center; font-size: 0.8rem; }
 .ref-ok { border-color: #009143; }
 .ref-fail { border-color: #d70010; }
 .ref p { margin: 0; }
 .ref-sum summary { cursor: pointer; font-size: 0.85rem; }
-.link-btn { background: none; border: none; color: #26324f; text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
+.link-btn { background: none; border: none; color: var(--navy); text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
 
 /* signed-in user chip in the top bar */
 .account { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
 .account b { font-weight: 700; }
+
+.sign-logo { height: 1.15em; width: auto; vertical-align: -0.12em; }
+/* buttons never wrap onto two lines */
+.btn, .seg button { white-space: nowrap; }

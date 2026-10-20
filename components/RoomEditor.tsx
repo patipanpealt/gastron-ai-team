@@ -229,7 +229,7 @@ export function RoomEditor({ edit, setEdit, onDone }: { edit: EditState; setEdit
   return (
     <div className="wood room-editor" role="region" aria-label="แต่งห้อง">
       <div className="room-head">
-        <h2>🏠 แต่งห้อง</h2>
+        <h2>แต่งห้อง</h2>
         <p className="muted small">
           เลือกของจากรายการ แล้วคลิกในห้องเพื่อวาง · คลิกของในห้องเพื่อเลือก ลากเพื่อย้าย · <kbd>R</kbd> หมุน · <kbd>Delete</kbd> ลบ · <kbd>Esc</kbd> ยกเลิก · กด Shift ค้างตอนวางเพื่อวางต่อเนื่อง · ของติดผนัง/ป้าย/ประตูลากไปวางบนหน้าแผ่น partition แนวนอนได้
         </p>

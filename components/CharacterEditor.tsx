@@ -140,7 +140,7 @@ export function CharacterEditor({ initial, onClose }: { initial: AgentId; onClos
       <div className="modal editor" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="แต่งตัวและตั้งชื่อตัวละคร">
         <div className="drawer-head">
           <div>
-            <h2>🧑‍🎨 แต่งตัว &amp; ตั้งชื่อ</h2>
+            <h2>แต่งตัว &amp; ตั้งชื่อ</h2>
             <p className="muted small">ตั้งชื่อและเลือกหน้าตา ผม เสื้อ กางเกง/กระโปรง ของทีมแต่ละคน — บันทึกในเครื่องนี้อัตโนมัติ</p>
           </div>
           <button className="btn-x" onClick={onClose} aria-label="ปิด">
