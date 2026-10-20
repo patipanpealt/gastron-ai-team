@@ -1,9 +1,9 @@
 // The models a user can pick. Only those whose provider has a key on the server are offered.
 import { GEMINI_KEY, GEMINI_MODEL } from "./gemini";
-import { OMNI_KEY, OMNI_MODEL } from "./omniroute";
+import { GROQ_KEY, OMNI_KEY, OMNI_MODEL, OPENROUTER_KEY } from "./omniroute";
 import { OPENAI_KEY } from "./openai";
 
-export type Provider = "claude" | "gemini" | "omniroute" | "openai";
+export type Provider = "claude" | "gemini" | "omniroute" | "openai" | "groq" | "openrouter";
 
 export interface ModelOption {
   /** "provider:model" — what the browser sends back. */
@@ -25,6 +25,15 @@ export function availableModels(): ModelOption[] {
     out.push(opt("gemini", GEMINI_MODEL, "Gemini Flash", "ฟรี · ค่าเริ่มต้น"));
     out.push(opt("gemini", "gemini-3.5-flash-lite", "Gemini Flash-Lite", "ฟรี · เร็ว โควต้าเยอะกว่า"));
     out.push(opt("gemini", "gemini-2.5-pro", "Gemini 2.5 Pro", "ฟรี · คิดลึก โควต้าน้อย"));
+  }
+  if (GROQ_KEY) {
+    out.push(opt("groq", "openai/gpt-oss-120b", "Groq · GPT-OSS 120B", "ฟรี · เร็วมาก (โมเดลเปิดของ OpenAI)"));
+    out.push(opt("groq", "llama-3.3-70b-versatile", "Groq · Llama 3.3 70B", "ฟรี · เร็ว"));
+  }
+  if (OPENROUTER_KEY) {
+    out.push(opt("openrouter", "google/gemma-4-31b-it:free", "OpenRouter · Gemma 4 31B", "ฟรี · จำกัดครั้งต่อวัน"));
+    out.push(opt("openrouter", "nvidia/nemotron-3-ultra-550b-a55b:free", "OpenRouter · Nemotron 3 Ultra", "ฟรี · ใหญ่ ช้ากว่า"));
+    out.push(opt("openrouter", "minimax/minimax-m3.1-flash:free", "OpenRouter · MiniMax M3.1 Flash", "ฟรี · จำกัดครั้งต่อวัน"));
   }
   if (OPENAI_KEY) {
     out.push(opt("openai", "gpt-6.1-sol", "ChatGPT · GPT-6.1 Sol", "เสียเงิน · สมดุล"));

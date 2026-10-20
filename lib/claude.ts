@@ -12,7 +12,7 @@ export const USE_FALLBACKS = process.env.CLAUDE_FALLBACKS !== "off";
 export const DEFAULT_MODEL: ModelOption | null = (() => {
   const all = availableModels();
   const forced = process.env.AI_PROVIDER as Provider | undefined;
-  for (const p of forced ? [forced] : (["omniroute", "claude", "openai", "gemini"] as Provider[])) {
+  for (const p of forced ? [forced] : (["omniroute", "claude", "openai", "gemini", "groq", "openrouter"] as Provider[])) {
     const first = all.find((m) => m.provider === p);
     if (first) return all.find((m) => m.provider === p && (m.model === MODEL || p !== "claude")) ?? first;
   }

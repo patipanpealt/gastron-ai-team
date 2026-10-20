@@ -108,3 +108,5 @@ With `KV_REST_API_URL`/`KV_REST_API_TOKEN` (or `UPSTASH_REDIS_REST_URL`/`_TOKEN`
 ## Picking the AI model
 
 The brief panel has a model picker. It lists every model whose provider has a key on the server (`lib/models.ts`: Gemini Flash / Flash-Lite / 2.5 Pro, ChatGPT GPT-6.1 Sol / Luna / Astra with `OPENAI_API_KEY`, Claude Sonnet / Haiku / Opus with `ANTHROPIC_API_KEY`, OmniRoute locally). The pick is remembered per browser and sent as `modelChoice`; the server ignores picks it can't serve and uses its default.
+
+Free extra providers: `GROQ_API_KEY` (Groq: GPT-OSS 120B, Llama 3.3 70B) and `OPENROUTER_API_KEY` (OpenRouter `:free` models). Both use the OpenAI-compatible client in `lib/omniroute.ts`.
