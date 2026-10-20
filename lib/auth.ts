@@ -1,6 +1,8 @@
 // Email + password login. Users live in the AUTH_USERS env var (JSON, with scrypt hashes — never plain passwords):
 //   [{"email":"a@b.com","role":"admin","hash":"scrypt:<salt-hex>:<hash-hex>"}]
 // A signed cookie (HMAC-SHA256 with AUTH_SECRET) carries email + role. No AUTH_USERS = no login (local dev).
+import { getMember } from "./members";
+
 export const AUTH_COOKIE = "office_session";
 export const SESSION_DAYS = 30;
 
@@ -46,8 +48,8 @@ export async function verifySession(token: string | undefined): Promise<Session 
   try {
     const d = JSON.parse(unb64(body)) as { e: string; r: Role; x: number };
     if (!d.e || d.x < Date.now()) return null;
-    // the user must still exist (removing someone from AUTH_USERS logs them out)
-    const u = authUsers().find((x) => x.email === d.e);
+    // the user must still exist (removing someone from AUTH_USERS or the member list logs them out)
+    const u = authUsers().find((x) => x.email.toLowerCase() === d.e.toLowerCase()) ?? (await getMember(d.e));
     return u ? { email: u.email, role: u.role === "admin" ? "admin" : "member" } : null;
   } catch {
     return null;

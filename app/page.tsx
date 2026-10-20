@@ -6,6 +6,7 @@ import { CharacterEditor } from "@/components/CharacterEditor";
 import { OfficeCanvas } from "@/components/OfficeCanvas";
 import { RoomEditor } from "@/components/RoomEditor";
 import { MemoryPanel, TeachBox } from "@/components/MemoryPanel";
+import { MembersPanel } from "@/components/MembersPanel";
 import { downloadBriefPdf } from "@/lib/pdf";
 import { MAX_REFERENCES, newReference, type Reference, referencesBlock } from "@/lib/references";
 import { AGENT_BY_ID, AGENTS, type AgentId, type RunKind, TEAM_LABEL, type Team } from "@/lib/agents";
@@ -102,6 +103,7 @@ export default function OfficePage() {
   const [edit, setEditState] = useState<EditState>({ active: false, placing: null, selectedId: null });
   const [charEditor, setCharEditor] = useState<AgentId | null>(null);
   const [showMemory, setShowMemory] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
   const [me, setMe] = useState<{ email: string; role: string } | null>(null);
   useEffect(() => {
     void fetch("/api/me")
@@ -202,6 +204,11 @@ export default function OfficePage() {
           {me && (
             <span className="tag-wood account" title={`ล็อกอินเป็น ${me.email}`}>
               <b>{me.role === "admin" ? "👑" : "👤"}</b> {me.email}
+              {me.role === "admin" && (
+                <button className="link-btn" onClick={() => setShowMembers(true)}>
+                  สมาชิก
+                </button>
+              )}
               <button
                 className="link-btn"
                 onClick={() => void fetch("/api/logout", { method: "POST" }).then(() => (window.location.href = "/login"))}
@@ -548,6 +555,7 @@ export default function OfficePage() {
 
       {selected && <AgentDrawer id={selected} run={run} onClose={() => setSelected(null)} onEdit={() => setCharEditor(selected)} />}
       {showMemory && <MemoryPanel onClose={() => setShowMemory(false)} />}
+      {showMembers && <MembersPanel onClose={() => setShowMembers(false)} />}
       {charEditor && <CharacterEditor initial={charEditor} onClose={() => setCharEditor(null)} />}
       {showFinal && run && <FinalModal run={run} onClose={() => setShowFinal(false)} />}
     </div>
