@@ -11,7 +11,7 @@ import { MAX_REFERENCES, newReference, type Reference, referencesBlock } from "@
 import { AGENT_BY_ID, AGENTS, type AgentId, type RunKind, TEAM_LABEL, type Team } from "@/lib/agents";
 import type { EditState, OfficeEngine } from "@/lib/office/engine";
 import { office, useOffice } from "@/lib/office/store";
-import { loadHistory, Orchestrator, type Phase, type RunState, runToMarkdown, saveRun } from "@/lib/orchestrator";
+import { fetchSharedHistory, loadHistory, mergeRuns, Orchestrator, type Phase, type RunState, runToMarkdown, saveRun } from "@/lib/orchestrator";
 
 const PRESETS: Record<RunKind, string[]> = {
   facebook: [
@@ -91,6 +91,7 @@ export default function OfficePage() {
 
   useEffect(() => {
     setHistory(loadHistory());
+    void fetchSharedHistory().then((shared) => shared && setHistory((cur) => mergeRuns(shared, cur)));
     fetch("/api/status")
       .then((r) => r.json())
       .then(setStatus)
@@ -119,7 +120,7 @@ export default function OfficePage() {
       setRun(r);
       if (r.phase === "done") {
         saveRun(r);
-        setHistory(loadHistory());
+        setHistory((cur) => mergeRuns([r], cur));
       }
     });
     orch.current = o;

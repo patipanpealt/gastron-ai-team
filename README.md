@@ -100,3 +100,7 @@ Set `OMNIROUTE_KEY` (and optionally `OMNIROUTE_MODEL`, e.g. a combo name) and th
 ## Login
 
 Email + password login (`/login`, `lib/auth.ts`, `lib/password.ts`). Users come from `AUTH_USERS` (JSON with scrypt hashes, never plain passwords) and the session cookie is signed with `AUTH_SECRET`. Roles: `admin`, `member`. With `AUTH_USERS` empty the app is open (local dev).
+
+## Shared สอนทีม + history
+
+With `KV_REST_API_URL`/`KV_REST_API_TOKEN` (or `UPSTASH_REDIS_REST_URL`/`_TOKEN`) set, `/api/team` keeps the team's memory notes and the last 30 finished runs in Upstash Redis, so every logged-in device sees the same. Without them each browser keeps its own copy (localStorage). Room layout and character names stay per browser.

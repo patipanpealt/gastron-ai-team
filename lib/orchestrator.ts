@@ -462,7 +462,7 @@ export class Orchestrator {
   }
 }
 
-// ---------- history (per browser) ----------
+// ---------- history: this browser + the team's shared store (/api/team, Upstash) ----------
 
 const KEY = "gastron-office-runs";
 
@@ -474,14 +474,33 @@ export function loadHistory(): RunState[] {
   }
 }
 
-export function saveRun(run: RunState) {
+/** Newest first, one entry per run id. */
+export function mergeRuns(a: RunState[], b: RunState[]) {
+  const byId = new Map<string, RunState>();
+  for (const r of [...a, ...b]) byId.set(r.id, r);
+  return [...byId.values()].sort((x, y) => y.createdAt - x.createdAt).slice(0, 30);
+}
+
+/** Runs everyone on the team has finished (null when there is no shared store). */
+export async function fetchSharedHistory(): Promise<RunState[] | null> {
   try {
-    const list = loadHistory().filter((r) => r.id !== run.id);
-    list.unshift(run);
-    localStorage.setItem(KEY, JSON.stringify(list.slice(0, 20)));
+    const res = await fetch("/api/team", { cache: "no-store" });
+    const data = (await res.json()) as { shared?: boolean; runs?: RunState[] };
+    return data.shared ? (data.runs ?? []) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveRun(run: RunState) {
+  // the thinking traces are long and nobody re-reads them later
+  const lean: RunState = { ...run, tasks: run.tasks.map((t) => ({ ...t, thinking: "" })), final: { ...run.final, thinking: "" } };
+  try {
+    localStorage.setItem(KEY, JSON.stringify(mergeRuns([lean], loadHistory()).slice(0, 20)));
   } catch {
     // storage full or blocked — history is a convenience only
   }
+  void fetch("/api/team", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ run: lean }) }).catch(() => undefined);
 }
 
 export function runToMarkdown(run: RunState) {
