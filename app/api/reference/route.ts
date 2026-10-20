@@ -12,7 +12,7 @@ const SYSTEM = `คุณช่วยทีมการตลาดอ่าน�
 ถ้าเนื้อหาไม่เกี่ยวกับงานการตลาดหรือขาดข้อมูล ให้บอกตรง ๆ สั้น ๆ`;
 
 export async function POST(req: Request) {
-  const { url, note } = (await req.json()) as { url?: string; note?: string };
+  const { url, note, modelChoice } = (await req.json()) as { url?: string; note?: string; modelChoice?: string };
   if (!url?.trim()) return NextResponse.json({ error: "กรุณาใส่ลิงก์" }, { status: 400 });
   const read = await readUrl(url);
   if (!read.ok) return NextResponse.json({ ok: false, problem: read.problem });
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, summary: `[DEMO] อ่านลิงก์ได้ ${read.text.length} ตัวอักษร — ใส่ API key เพื่อให้ AI สรุปจริง\n\n${read.text.slice(0, 300)}…` });
   }
   try {
-    const summary = await completeText(SYSTEM, `ลิงก์: ${url}\nโน้ตของหัวหน้า: ${note?.trim() || "(ไม่มี)"}\n\nเนื้อหาที่อ่านได้:\n"""\n${read.text}\n"""`, 1500);
+    const summary = await completeText(SYSTEM, `ลิงก์: ${url}\nโน้ตของหัวหน้า: ${note?.trim() || "(ไม่มี)"}\n\nเนื้อหาที่อ่านได้:\n"""\n${read.text}\n"""`, 1500, modelChoice);
     return NextResponse.json({ ok: true, summary });
   } catch (err) {
     return NextResponse.json({ ok: false, problem: errorMessage(err) });

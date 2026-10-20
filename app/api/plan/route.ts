@@ -1,25 +1,26 @@
 import { NextResponse } from "next/server";
 import { type Plan, type PlanTask, type RunKind, WORKER_IDS } from "@/lib/agents";
-import { claude, DEMO_MODE, EFFORT, MODEL, PROVIDER, USE_FALLBACKS, errorMessage } from "@/lib/claude";
-import { geminiJson } from "@/lib/gemini";
-import { omniComplete } from "@/lib/omniroute";
+import { claude, DEFAULT_MODEL, EFFORT, USE_FALLBACKS, errorMessage } from "@/lib/claude";
+import { llmComplete } from "@/lib/llm";
+import { resolveModel } from "@/lib/models";
 import { demoPlan } from "@/lib/demo";
 import { PLAN_SCHEMA, PLAN_SYSTEM, planPrompt } from "@/lib/prompts";
 
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
-  const { brief, kind = "graphic", names } = (await req.json()) as { brief?: string; kind?: RunKind; names?: Record<string, string> };
+  const { brief, kind = "graphic", names, modelChoice } = (await req.json()) as { brief?: string; kind?: RunKind; names?: Record<string, string>; modelChoice?: string };
+  const m = resolveModel(modelChoice, DEFAULT_MODEL);
   if (!brief?.trim()) return NextResponse.json({ error: "กรุณาใส่ brief" }, { status: 400 });
 
-  if (DEMO_MODE) {
+  if (!m) {
     await new Promise((r) => setTimeout(r, 2500));
     return NextResponse.json({ plan: demoPlan(brief, kind), demo: true });
   }
 
   try {
-    if (PROVIDER === "omniroute") {
-      const raw = await omniComplete({
+    if (m.provider !== "claude") {
+      const raw = await llmComplete(m, {
         system: PLAN_SYSTEM,
         user: `${planPrompt(brief, kind, names)}\n\nตอบเป็น JSON เท่านั้น ตาม schema นี้:\n${JSON.stringify(PLAN_SCHEMA)}`,
         maxTokens: 8000,
@@ -28,17 +29,8 @@ export async function POST(req: Request) {
       });
       return NextResponse.json({ plan: sanitize(JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g, "")) as Plan) });
     }
-    if (PROVIDER === "gemini") {
-      const text = await geminiJson({
-        system: PLAN_SYSTEM,
-        user: `${planPrompt(brief, kind, names)}\n\nตอบเป็น JSON เท่านั้น ตาม schema นี้:\n${JSON.stringify(PLAN_SCHEMA)}`,
-        maxTokens: 8000,
-        signal: req.signal,
-      });
-      return NextResponse.json({ plan: sanitize(JSON.parse(text) as Plan) });
-    }
     const res = await claude().beta.messages.create({
-      model: MODEL,
+      model: m.model,
       max_tokens: 16000,
       system: PLAN_SYSTEM,
       messages: [{ role: "user", content: planPrompt(brief, kind, names) }],

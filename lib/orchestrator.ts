@@ -71,6 +71,8 @@ export class Orchestrator {
     kind: RunKind,
     private office: OfficeEngine,
     private onChange: (run: RunState) => void,
+    /** Model the user picked ("provider:model"), sent with every request. */
+    private modelChoice?: string,
   ) {
     this.run = {
       id: uid(),
@@ -239,7 +241,7 @@ export class Orchestrator {
     const res = await fetch("/api/plan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ brief: this.run.brief, kind: this.run.kind, names: teamNames() }),
+      body: JSON.stringify({ brief: this.run.brief, kind: this.run.kind, names: teamNames(), modelChoice: this.modelChoice }),
       signal: this.abort.signal,
     });
     const data = (await res.json()) as { plan?: Plan; error?: string; demo?: boolean };
@@ -429,7 +431,7 @@ export class Orchestrator {
     const res = await fetch("/api/agent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...req, names: teamNames(), memory: memoryFor(req.agentId) }),
+      body: JSON.stringify({ ...req, names: teamNames(), memory: memoryFor(req.agentId), modelChoice: this.modelChoice }),
       signal: this.abort.signal,
     });
     if (!res.ok || !res.body) {

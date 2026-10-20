@@ -32,6 +32,8 @@ export interface AgentRequest {
   names?: Record<string, string>;
   /** What the user has taught this agent (rules, good examples, feedback). */
   memory?: string;
+  /** Model the user picked ("provider:model"); the server falls back to its default. */
+  modelChoice?: string;
 }
 
 const OFFICE_RULES = `คุณเป็นสมาชิกทีมการตลาด AI ใน Virtual Office ของ Gastron Thailand ทำงานร่วมกับเพื่อนร่วมทีมคนอื่น

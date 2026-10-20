@@ -104,3 +104,7 @@ Email + password login (`/login`, `lib/auth.ts`, `lib/password.ts`). Users come 
 ## Shared สอนทีม + history
 
 With `KV_REST_API_URL`/`KV_REST_API_TOKEN` (or `UPSTASH_REDIS_REST_URL`/`_TOKEN`) set, `/api/team` keeps the team's memory notes and the last 30 finished runs in Upstash Redis, so every logged-in device sees the same. Without them each browser keeps its own copy (localStorage). Room layout and character names stay per browser.
+
+## Picking the AI model
+
+The brief panel has a model picker. It lists every model whose provider has a key on the server (`lib/models.ts`: Gemini Flash / Flash-Lite / 2.5 Pro, ChatGPT GPT-6.1 Sol / Luna / Astra with `OPENAI_API_KEY`, Claude Sonnet / Haiku / Opus with `ANTHROPIC_API_KEY`, OmniRoute locally). The pick is remembered per browser and sent as `modelChoice`; the server ignores picks it can't serve and uses its default.

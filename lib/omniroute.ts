@@ -5,6 +5,7 @@ export const OMNI_URL = (process.env.OMNIROUTE_URL || "http://localhost:20128/v1
 export const OMNI_MODEL = process.env.OMNIROUTE_MODEL || "gemini/gemini-3.8-flash";
 
 interface Req {
+  model?: string;
   system: string;
   user: string;
   maxTokens: number;
@@ -19,7 +20,7 @@ async function call(req: Req, stream: boolean) {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${OMNI_KEY}` },
       body: JSON.stringify({
-        model: OMNI_MODEL,
+        model: req.model || OMNI_MODEL,
         stream,
         max_tokens: req.maxTokens,
         messages: [
