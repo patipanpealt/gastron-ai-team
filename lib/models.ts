@@ -28,10 +28,10 @@ export function availableModels(): ModelOption[] {
   }
   if (GROQ_KEY) {
     out.push(opt("groq", "openai/gpt-oss-120b", "Groq · GPT-OSS 120B", "ฟรี · เร็วมาก (โมเดลเปิดของ OpenAI)"));
-    out.push(opt("groq", "llama-3.3-70b-versatile", "Groq · Llama 3.3 70B", "ฟรี · เร็ว"));
+    out.push(opt("groq", "qwen/qwen3.8-27b", "Groq · Qwen 3.8 27B", "ฟรี · เร็ว ภาษาไทยดี"));
   }
   if (OPENROUTER_KEY) {
-    out.push(opt("openrouter", "google/gemma-4-31b-it:free", "OpenRouter · Gemma 4 31B", "ฟรี · จำกัดครั้งต่อวัน"));
+    out.push(opt("openrouter", "nvidia/nemotron-3.5-lightning:free", "OpenRouter · Nemotron 3.5 Lightning", "ฟรี · เร็ว"));
     out.push(opt("openrouter", "nvidia/nemotron-3-ultra-550b-a55b:free", "OpenRouter · Nemotron 3 Ultra", "ฟรี · ใหญ่ ช้ากว่า"));
     out.push(opt("openrouter", "minimax/minimax-m3.1-flash:free", "OpenRouter · MiniMax M3.1 Flash", "ฟรี · จำกัดครั้งต่อวัน"));
   }

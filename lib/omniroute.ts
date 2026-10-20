@@ -25,7 +25,7 @@ const CFG: Record<CompatProvider, Cfg> = {
     name: "OpenRouter",
     url: "https://openrouter.ai/api/v1",
     key: OPENROUTER_KEY,
-    defaultModel: "google/gemma-4-31b-it:free",
+    defaultModel: "nvidia/nemotron-3.5-lightning:free",
     jsonMode: false,
     headers: { "X-Title": "Gastron AI Office" },
   },

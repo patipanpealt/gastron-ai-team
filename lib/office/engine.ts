@@ -363,9 +363,11 @@ export class OfficeEngine {
     const pts: Pt[] = [];
     if (a.seated && mySeat) pts.push(center(appr(mySeat)));
     // each agent keeps to its own lane so a group walking the same route does not stack up on one line
-    const h = [...id].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7);
-    const jx = ((h % 5) - 2) * 3;
-    const jy = (((h >> 3) % 5) - 2) * 3;
+    // unsigned 32-bit hash: a float/negative hash once pushed the lane offset to -18 px, a whole row up, into desks
+    const h = [...id].reduce((n, ch) => (Math.imul(n, 31) + ch.charCodeAt(0)) >>> 0, 7);
+    const jx = ((h % 5) - 2) * 3; // -6..6 px
+    // feet stand at tile top + 27 (see center), so only nudge them up: -12..0 px keeps them inside the tile
+    const jy = -((h >>> 3) % 5) * 3;
     tiles.forEach((t, i) => {
       const c = center(t);
       pts.push(i === tiles.length - 1 && !finalPx ? c : { x: c.x + jx, y: c.y + jy });
