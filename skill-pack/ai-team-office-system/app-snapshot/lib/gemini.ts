@@ -5,6 +5,8 @@ export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
 interface GeminiReq {
+  /** Model to try first (defaults to GEMINI_MODEL); lighter models follow when its quota runs out. */
+  model?: string;
   system: string;
   user: string;
   maxTokens: number;
@@ -33,14 +35,14 @@ async function fail(res: Response): Promise<never> {
 }
 
 /** Each model has its own free daily quota, so when one runs out we move on to the next one. */
-const MODELS = [...new Set([GEMINI_MODEL, "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"])];
+const FALLBACKS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
 const exhausted = new Map<string, number>(); // model -> when to try it again
 
 /** Per-minute limits: wait and retry. Per-day limits: switch model. */
 async function post(method: "streamGenerateContent?alt=sse" | "generateContent", req: GeminiReq, json: boolean): Promise<Response> {
   const waits = [6000, 15000, 30000];
   let last: Response | null = null;
-  for (const model of MODELS) {
+  for (const model of [...new Set([req.model || GEMINI_MODEL, ...FALLBACKS])]) {
     if ((exhausted.get(model) ?? 0) > Date.now()) continue;
     for (let i = 0; ; i++) {
       const res = await fetch(`${BASE}/${model}:${method}`, {

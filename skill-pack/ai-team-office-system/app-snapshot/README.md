@@ -1,6 +1,24 @@
 # Gastron AI Marketing Office
 
-ออฟฟิศเสมือนแบบ pixel art ที่ทีมการตลาด AI 11 ตำแหน่งทำงานร่วมกันจริงผ่าน Claude API
+ออฟฟิศเสมือนแบบ pixel art ที่ทีมการตลาด AI 11 ตำแหน่งช่วยกันคิด brief โพสต์ และแคมเปญ
+
+## ทำงานต่อบนเครื่องอื่น (Quick start)
+
+```bash
+git clone https://github.com/patipanpealt/gastron-ai-team.git
+cd gastron-ai-team
+npm install
+cp .env.example .env.local     # แล้วใส่ค่าลับของคุณเอง (ดูด้านล่าง) — ห้าม commit ไฟล์นี้
+npm run dev                    # http://localhost:3300
+```
+
+- ต้องใช้ Node.js 22 ขึ้นไป ถ้า `next dev` ล้มด้วย "Failed to open database" ให้ลบโฟลเดอร์ `.next` แล้วรันใหม่
+- ไม่มี `.env.local` ก็รันได้ จะเป็นโหมด DEMO (ข้อความจำลอง ไม่เรียก AI และไม่ต้องล็อกอิน)
+- ค่าที่ต้องใส่ใน `.env.local` / Vercel (ค่าลับทั้งหมดอยู่นอก git): `GEMINI_API_KEY` (ฟรี), `GROQ_API_KEY`, `OPENROUTER_API_KEY`, ล็อกอิน `AUTH_USERS` + `AUTH_SECRET`, ที่เก็บกลาง `KV_REST_API_URL`/`KV_REST_API_TOKEN` (Upstash) ดูรายละเอียดใน `.env.example`
+- ไฟล์ค่าลับของเครื่องเดิมอยู่ที่ `.env.local` และ `.env.vercel` (ไม่ขึ้น git) ต้องย้ายเองหรือสร้างใหม่
+- Deploy: push เข้า `main` แล้ว Vercel (โปรเจกต์ `gastron-ai-team`) build ให้อัตโนมัติ
+- เอกสารเชิงลึกสำหรับ AI/คนที่มารับช่วงต่อ: `skill-pack/` (สกิล `pixel-art-2d-office` และ `ai-team-office-system`)
+
 
 ## ทีม
 | ทีม | สมาชิก |
@@ -100,3 +118,15 @@ Set `OMNIROUTE_KEY` (and optionally `OMNIROUTE_MODEL`, e.g. a combo name) and th
 ## Login
 
 Email + password login (`/login`, `lib/auth.ts`, `lib/password.ts`). Users come from `AUTH_USERS` (JSON with scrypt hashes, never plain passwords) and the session cookie is signed with `AUTH_SECRET`. Roles: `admin`, `member`. With `AUTH_USERS` empty the app is open (local dev).
+
+## Shared สอนทีม + history
+
+With `KV_REST_API_URL`/`KV_REST_API_TOKEN` (or `UPSTASH_REDIS_REST_URL`/`_TOKEN`) set, `/api/team` keeps the team's memory notes and the last 30 finished runs in Upstash Redis, so every logged-in device sees the same. Without them each browser keeps its own copy (localStorage). Room layout and character names stay per browser.
+
+## Picking the AI model
+
+The brief panel has a model picker. It lists every model whose provider has a key on the server (`lib/models.ts`: Gemini Flash / Flash-Lite / 2.5 Pro, ChatGPT GPT-6.1 Sol / Luna / Astra with `OPENAI_API_KEY`, Claude Sonnet / Haiku / Opus with `ANTHROPIC_API_KEY`, OmniRoute locally). The pick is remembered per browser and sent as `modelChoice`; the server ignores picks it can't serve and uses its default.
+
+Free extra providers: `GROQ_API_KEY` (Groq: GPT-OSS 120B, Qwen 3.8 27B) and `OPENROUTER_API_KEY` (OpenRouter `:free` models). Both use the OpenAI-compatible client in `lib/omniroute.ts`.
+
+**Partition + ประตู** (`partition_door`, room editor → กั้นโซน & ป้าย): a one-tile partition with a door built in, same styles/colours as the normal panel so it lines up with them, horizontal or vertical. Its tile is always walkable and the door swings open while an agent is within ~40 px.

@@ -47,6 +47,8 @@ export interface ItemDef {
   workstation?: boolean;
   /** Drawn by code instead of from a sprite: a partition panel or a name plaque. */
   proc?: "partition" | "plaque" | "door";
+  /** A one-tile partition with a door in it: agents walk through, the door swings open for them. */
+  doorway?: boolean;
   /** The user can pick a colour (rugs). */
   tint?: boolean;
 }
@@ -109,6 +111,19 @@ export const ITEMS: ItemDef[] = [
     proc: "partition",
     tint: true,
     // footprint comes from the panel's length (see room.ts)
+    variant: () => ({ sprite: "", fp: [1, 1] }),
+  },
+  {
+    type: "partition_door",
+    name: "Partition + ประตู (ต่อกับแผ่นปกติได้)",
+    icon: "🚪",
+    cat: "zone",
+    kind: "floor",
+    rots: ["S", "E"],
+    block: true,
+    proc: "partition",
+    doorway: true,
+    tint: true,
     variant: () => ({ sprite: "", fp: [1, 1] }),
   },
   {

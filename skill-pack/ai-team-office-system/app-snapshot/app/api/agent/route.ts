@@ -1,6 +1,6 @@
-import { claude, DEMO_MODE, EFFORT, MODEL, PROVIDER, USE_FALLBACKS, errorMessage } from "@/lib/claude";
-import { geminiStream } from "@/lib/gemini";
-import { omniStream } from "@/lib/omniroute";
+import { claude, DEFAULT_MODEL, EFFORT, USE_FALLBACKS, errorMessage } from "@/lib/claude";
+import { llmStream } from "@/lib/llm";
+import { type ModelOption, resolveModel } from "@/lib/models";
 import { demoOutput } from "@/lib/demo";
 import { type AgentRequest, systemFor, userMessageFor } from "@/lib/prompts";
 
@@ -16,10 +16,10 @@ export async function POST(req: Request) {
     async start(controller) {
       const send = (obj: object) => controller.enqueue(enc.encode(JSON.stringify(obj) + "\n"));
       try {
-        if (DEMO_MODE) await runDemo(body, send);
-        else if (PROVIDER === "omniroute") await runOmni(body, send, req.signal);
-        else if (PROVIDER === "gemini") await runGemini(body, send, req.signal);
-        else await runClaude(body, send, req.signal);
+        const m = resolveModel(body.modelChoice, DEFAULT_MODEL);
+        if (!m) await runDemo(body, send);
+        else if (m.provider === "claude") await runClaude(body, m, send, req.signal);
+        else await runOther(body, m, send, req.signal);
         send({ type: "done" });
       } catch (err) {
         send({ type: "error", message: errorMessage(err) });
@@ -34,27 +34,17 @@ export async function POST(req: Request) {
   });
 }
 
-async function runOmni(body: AgentRequest, send: (o: object) => void, signal: AbortSignal) {
+async function runOther(body: AgentRequest, m: ModelOption, send: (o: object) => void, signal: AbortSignal) {
   const system = systemFor(body.mode === "compile" ? "director" : body.agentId, body.kind, body.names, body.mode === "chat", body.memory)
     .map((b) => b.text)
     .join("\n\n");
-  await omniStream({ system, user: userMessageFor(body), maxTokens: body.mode === "chat" ? 1500 : 16000, signal }, (text) => send({ type: "text", text }));
+  await llmStream(m, { system, user: userMessageFor(body), maxTokens: body.mode === "chat" ? 1500 : 16000, signal }, (text) => send({ type: "text", text }));
 }
 
-async function runGemini(body: AgentRequest, send: (o: object) => void, signal: AbortSignal) {
-  const system = systemFor(body.mode === "compile" ? "director" : body.agentId, body.kind, body.names, body.mode === "chat", body.memory)
-    .map((b) => b.text)
-    .join("\n\n");
-  await geminiStream(
-    { system, user: userMessageFor(body), maxTokens: body.mode === "chat" ? 1500 : 16000, signal },
-    (text) => send({ type: "text", text }),
-  );
-}
-
-async function runClaude(body: AgentRequest, send: (o: object) => void, signal: AbortSignal) {
+async function runClaude(body: AgentRequest, m: ModelOption, send: (o: object) => void, signal: AbortSignal) {
   const stream = claude().beta.messages.stream(
     {
-      model: MODEL,
+      model: m.model,
       max_tokens: body.mode === "chat" ? 1500 : 32000,
       system: systemFor(body.mode === "compile" ? "director" : body.agentId, body.kind, body.names, body.mode === "chat", body.memory),
       messages: [{ role: "user", content: userMessageFor(body) }],

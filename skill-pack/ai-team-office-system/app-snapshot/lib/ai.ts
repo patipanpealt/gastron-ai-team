@@ -1,12 +1,12 @@
-// A single plain-text completion, whichever AI provider is configured (used for small side jobs like summaries).
-import { claude, DEMO_MODE, MODEL, PROVIDER } from "./claude";
-import { geminiComplete } from "./gemini";
-import { omniComplete } from "./omniroute";
+// A single plain-text completion with the picked (or default) model, for small side jobs like summaries.
+import { claude, DEFAULT_MODEL } from "./claude";
+import { llmComplete } from "./llm";
+import { resolveModel } from "./models";
 
-export async function completeText(system: string, user: string, maxTokens = 1500): Promise<string> {
-  if (DEMO_MODE) return "";
-  if (PROVIDER === "omniroute") return (await omniComplete({ system, user, maxTokens })).trim();
-  if (PROVIDER === "gemini") return (await geminiComplete({ system, user, maxTokens })).trim();
-  const res = await claude().messages.create({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: "user", content: user }] });
+export async function completeText(system: string, user: string, maxTokens = 1500, modelChoice?: string): Promise<string> {
+  const m = resolveModel(modelChoice, DEFAULT_MODEL);
+  if (!m) return "";
+  if (m.provider !== "claude") return (await llmComplete(m, { system, user, maxTokens })).trim();
+  const res = await claude().messages.create({ model: m.model, max_tokens: maxTokens, system, messages: [{ role: "user", content: user }] });
   return res.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("").trim();
 }

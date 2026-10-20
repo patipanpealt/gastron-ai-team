@@ -1847,3 +1847,7 @@ kbd {
 .sign-logo { height: 1.15em; width: auto; vertical-align: -0.12em; }
 /* buttons never wrap onto two lines */
 .btn, .seg button { white-space: nowrap; }
+
+/* AI model picker in the brief panel */
+.model-pick { display: flex; align-items: center; gap: 8px; margin: 8px 0 2px; font-size: 0.85rem; }
+.model-pick select { flex: 1; min-width: 0; padding: 6px 8px; border: 2px solid var(--rule-brown); border-radius: 6px; font: inherit; background: var(--field); }

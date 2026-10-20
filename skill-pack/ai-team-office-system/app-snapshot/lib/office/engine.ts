@@ -12,6 +12,7 @@ import {
   itemRect,
   newId,
   normRot,
+  DOOR_H,
   PART_H,
   PART_TOP,
   partitionGeo,
@@ -94,6 +95,8 @@ const BUBBLE_EDGE: Record<BubbleKind, string> = { think: "#111111", work: "#1111
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const center = (t: Tile): Pt => ({ x: t.c * TILE + TILE / 2, y: WALL_H + t.r * TILE + 27 });
+const DOOR_SPRITE = { w: 36, h: 60 }; // public/assets/furniture/door.png
+const DOOR_SCALE = 1.25;
 const appr = (s: SeatInfo): Tile => ({ c: s.approach.col, r: s.approach.row });
 const dirFromVec = (dx: number, dy: number): Dir => (Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "E" : "W") : dy > 0 ? "S" : "N");
 
@@ -363,9 +366,11 @@ export class OfficeEngine {
     const pts: Pt[] = [];
     if (a.seated && mySeat) pts.push(center(appr(mySeat)));
     // each agent keeps to its own lane so a group walking the same route does not stack up on one line
-    const h = [...id].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7);
-    const jx = ((h % 5) - 2) * 3;
-    const jy = (((h >> 3) % 5) - 2) * 3;
+    // unsigned 32-bit hash: a float/negative hash once pushed the lane offset to -18 px, a whole row up, into desks
+    const h = [...id].reduce((n, ch) => (Math.imul(n, 31) + ch.charCodeAt(0)) >>> 0, 7);
+    const jx = ((h % 5) - 2) * 3; // -6..6 px
+    // feet stand at tile top + 27 (see center), so only nudge them up: -12..0 px keeps them inside the tile
+    const jy = -((h >>> 3) % 5) * 3;
     tiles.forEach((t, i) => {
       const c = center(t);
       pts.push(i === tiles.length - 1 && !finalPx ? c : { x: c.x + jx, y: c.y + jy });
@@ -697,10 +702,12 @@ export class OfficeEngine {
   /** Doors in a partition swing open when an agent comes near and close shortly after they have gone. */
   private updateDoors(t: number) {
     for (const d of this.room.items) {
-      if (defOf(d).proc !== "door" || !d.mount || d.mount === "__floor__") continue;
-      const r = itemRect(d);
-      const cx = r.x + r.w / 2;
-      const cy = r.y + r.h - 12;
+      const doorway = !!defOf(d).doorway;
+      if (!doorway && (defOf(d).proc !== "door" || !d.mount || d.mount === "__floor__")) continue;
+      const r = doorway ? null : itemRect(d);
+      const [fw, fh] = footprint(d);
+      const cx = r ? r.x + r.w / 2 : d.col * TILE + (fw * TILE) / 2;
+      const cy = r ? r.y + r.h - 12 : WALL_H + d.row * TILE + (fh - 1) * (TILE / 2) + 27;
       let near = false;
       for (const a of this.actors.values()) {
         if (!a.seated && Math.hypot(a.x - cx, a.y - cy) < 40) near = true;
@@ -730,7 +737,7 @@ export class OfficeEngine {
   /** The partition whose front face is under the pointer, if any. */
   private hostAt(p: Pt): PlacedItem | null {
     for (const it of this.room.items) {
-      if (defOf(it).proc !== "partition") continue;
+      if (defOf(it).proc !== "partition" || defOf(it).doorway) continue;
       const f = partitionGeo(it).face;
       if (f && p.x >= f.x && p.x <= f.x + f.w && p.y >= f.y && p.y <= f.y + f.h) return it;
     }
@@ -978,15 +985,14 @@ export class OfficeEngine {
     const OL = "#2b2230";
     c.save();
     c.globalAlpha = alpha;
-    const holes = withDoors ? this.room.items.filter((d) => d.mount === it.id && defOf(d).proc === "door" && this.isDoorOpen(d)) : [];
+    const holes = withDoors ? this.room.items.filter((d) => d.mount === it.id && defOf(d).proc === "door" && this.isDoorOpen(d)).map((d) => itemRect(d)) : [];
+    const dw = defOf(it).doorway ? this.doorwayRect(it) : null;
+    if (dw && withDoors && this.isDoorOpen(it)) holes.push(dw);
     if (holes.length) {
       // an open door is a gap in the panel: what is behind it (floor, people walking through) shows
       c.beginPath();
       c.rect(g.body.x - 20, g.body.y - 20, g.body.w + 40, g.body.h + 60);
-      for (const d of holes) {
-        const r = itemRect(d);
-        c.rect(r.x, r.y, r.w, r.h);
-      }
+      for (const r of holes) c.rect(r.x, r.y, r.w, r.h);
       c.clip("evenodd");
     }
     if (g.horizontal) {
@@ -1068,6 +1074,52 @@ export class OfficeEngine {
     c.restore();
   }
 
+  /** The door opening of a Partition + ประตู: the whole tile, door-height, at the bottom of the panel. */
+  private doorwayRect(it: PlacedItem) {
+    const g = partitionGeo(it);
+    if (g.horizontal) {
+      const f = g.face!;
+      if (f.w < 2 * TILE) return { x: f.x, y: g.base - DOOR_H, w: TILE, h: DOOR_H };
+      // one big door in the middle, drawn from the original door sprite (36x60) at 1.25x: 45x75
+      const w = Math.round(DOOR_SPRITE.w * DOOR_SCALE);
+      const h = Math.round(DOOR_SPRITE.h * DOOR_SCALE);
+      return { x: Math.round(f.x + (f.w - w) / 2), y: g.base - h, w, h };
+    }
+    const b = g.body;
+    return { x: b.x - 2, y: g.base - PART_H, w: b.w + 4, h: PART_H };
+  }
+
+  /** The door leaf / frame of a Partition + ประตู, drawn over the panel. */
+  private drawDoorway(c: CanvasRenderingContext2D, it: PlacedItem, alpha = 1) {
+    const r = this.doorwayRect(it);
+    if (partitionGeo(it).horizontal) {
+      const big = r.w > TILE;
+      const img = big ? furnitureImage("door") : null;
+      if (big && img && !this.isDoorOpen(it)) {
+        c.save();
+        c.globalAlpha = alpha;
+        c.drawImage(img, r.x, r.y, r.w, r.h);
+        c.restore();
+      } else this.drawDoor(c, { ...it, type: "door", mount: it.id, x: r.x, y: r.y, open: it.open }, alpha, r);
+      return;
+    }
+    // seen edge-on: closed shows the door's frame on the panel; open leaves two posts and the lintel
+    c.save();
+    c.globalAlpha = alpha;
+    c.fillStyle = "#2b2230";
+    if (this.isDoorOpen(it)) {
+      c.fillRect(r.x + 2, r.y, r.w - 4, 4);
+      c.fillRect(r.x + 2, r.y + 4, r.w - 4, 3);
+    } else {
+      c.strokeStyle = "#2b2230";
+      c.lineWidth = 2;
+      c.strokeRect(r.x + 3, r.y + 6, r.w - 6, r.h - 8);
+      c.fillStyle = "#f0d27a";
+      c.fillRect(r.x + r.w / 2 - 1, r.y + r.h / 2, 2, 5);
+    }
+    c.restore();
+  }
+
   private drawPlaque(c: CanvasRenderingContext2D, it: PlacedItem, alpha = 1) {
     const { w, h } = wallSize(it);
     const x = it.x ?? 0;
@@ -1110,10 +1162,10 @@ export class OfficeEngine {
   }
 
   /** A door: shut it is a wooden panel, open it is a doorway with the leaf swung back. */
-  private drawDoor(c: CanvasRenderingContext2D, it: PlacedItem, alpha = 1) {
-    const { w, h } = wallSize(it);
-    const x = it.x ?? 0;
-    const y = it.y ?? 0;
+  private drawDoor(c: CanvasRenderingContext2D, it: PlacedItem, alpha = 1, box?: { x: number; y: number; w: number; h: number }) {
+    const { w, h } = box ?? wallSize(it);
+    const x = box?.x ?? it.x ?? 0;
+    const y = box?.y ?? it.y ?? 0;
     const onPanel = !!it.mount && it.mount !== "__floor__";
     const OL = "#2b2230";
     const wood = "#c98a4b";
@@ -1277,6 +1329,7 @@ export class OfficeEngine {
           y: baselineOf(it),
           draw: () => {
             this.drawPartition(c, it);
+            if (defOf(it).doorway) this.drawDoorway(c, it);
             for (const ch of hung) this.drawWallItem(c, ch);
           },
         });
@@ -1397,6 +1450,7 @@ export class OfficeEngine {
       else if (def.kind === "rug") this.drawRug(c, ghost, 0.8);
       else if (def.proc === "partition") {
         this.drawPartition(c, ghost, 0.8, false);
+        if (defOf(ghost).doorway) this.drawDoorway(c, ghost, 0.8);
         if (this.drag?.moved && this.drag.id === ghost.id) {
           // what is hung on the panel travels with it
           const og = partitionGeo(this.drag.orig).face;

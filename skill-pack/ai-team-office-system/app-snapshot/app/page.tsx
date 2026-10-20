@@ -6,12 +6,13 @@ import { CharacterEditor } from "@/components/CharacterEditor";
 import { OfficeCanvas } from "@/components/OfficeCanvas";
 import { RoomEditor } from "@/components/RoomEditor";
 import { MemoryPanel, TeachBox } from "@/components/MemoryPanel";
+import { MembersPanel } from "@/components/MembersPanel";
 import { downloadBriefPdf } from "@/lib/pdf";
 import { MAX_REFERENCES, newReference, type Reference, referencesBlock } from "@/lib/references";
 import { AGENT_BY_ID, AGENTS, type AgentId, type RunKind, TEAM_LABEL, type Team } from "@/lib/agents";
 import type { EditState, OfficeEngine } from "@/lib/office/engine";
 import { office, useOffice } from "@/lib/office/store";
-import { loadHistory, Orchestrator, type Phase, type RunState, runToMarkdown, saveRun } from "@/lib/orchestrator";
+import { fetchSharedHistory, loadHistory, mergeRuns, Orchestrator, type Phase, type RunState, runToMarkdown, saveRun } from "@/lib/orchestrator";
 
 const PRESETS: Record<RunKind, string[]> = {
   facebook: [
@@ -55,6 +56,31 @@ export default function OfficePage() {
   const [kind, setKind] = useState<RunKind>("graphic");
   const [brief, setBrief] = useState("");
   const [artworks, setArtworks] = useState<string[]>([]);
+  const [status, setStatus] = useState<{
+    demo: boolean;
+    model: string;
+    defaultModel: string | null;
+    models: { id: string; label: string; note: string }[];
+  } | null>(null);
+  // the AI model picked for the next job (remembered per browser); "" = server default
+  const [modelChoice, setModelChoice] = useState("");
+  useEffect(() => {
+    try {
+      setModelChoice(localStorage.getItem("gastron.model") || "");
+    } catch {
+      /* storage blocked */
+    }
+  }, []);
+  const pickModel = (id: string) => {
+    setModelChoice(id);
+    try {
+      localStorage.setItem("gastron.model", id);
+    } catch {
+      /* storage blocked */
+    }
+  };
+  // a remembered pick the server no longer offers falls back to the default
+  const chosenModel = status?.models.some((m) => m.id === modelChoice) ? modelChoice : (status?.defaultModel ?? "");
   const [refs, setRefs] = useState<Reference[]>([]);
   const patchRef = (id: string, patch: Partial<Reference>) => setRefs((cur) => cur.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   /** Ask the server to open the link, read it and summarise it. */
@@ -62,22 +88,22 @@ export default function OfficePage() {
     if (!r.url.trim()) return;
     patchRef(r.id, { status: "reading", problem: undefined });
     try {
-      const res = await fetch("/api/reference", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: r.url, note: r.note }) });
+      const res = await fetch("/api/reference", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: r.url, note: r.note, modelChoice: chosenModel }) });
       const data = (await res.json()) as { ok?: boolean; summary?: string; problem?: string; error?: string };
       if (data.ok) patchRef(r.id, { status: "ok", summary: data.summary ?? "", problem: undefined });
       else patchRef(r.id, { status: "fail", problem: data.problem || data.error || "อ่านลิงก์ไม่สำเร็จ" });
     } catch {
       patchRef(r.id, { status: "fail", problem: "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้" });
     }
-  }, []);
+  }, [chosenModel]);
   const [selected, setSelected] = useState<AgentId | null>(null);
   const [showFinal, setShowFinal] = useState(false);
   const [history, setHistory] = useState<RunState[]>([]);
-  const [status, setStatus] = useState<{ demo: boolean; model: string } | null>(null);
   const { profiles, room } = useOffice();
   const [edit, setEditState] = useState<EditState>({ active: false, placing: null, selectedId: null });
   const [charEditor, setCharEditor] = useState<AgentId | null>(null);
   const [showMemory, setShowMemory] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
   const [me, setMe] = useState<{ email: string; role: string } | null>(null);
   useEffect(() => {
     void fetch("/api/me")
@@ -91,6 +117,7 @@ export default function OfficePage() {
 
   useEffect(() => {
     setHistory(loadHistory());
+    void fetchSharedHistory().then((shared) => shared && setHistory((cur) => mergeRuns(shared, cur)));
     fetch("/api/status")
       .then((r) => r.json())
       .then(setStatus)
@@ -119,14 +146,14 @@ export default function OfficePage() {
       setRun(r);
       if (r.phase === "done") {
         saveRun(r);
-        setHistory(loadHistory());
+        setHistory((cur) => mergeRuns([r], cur));
       }
-    });
+    }, chosenModel || undefined);
     orch.current = o;
     setRun(o.run);
     setShowFinal(false);
     void o.start();
-  }, [brief, active, kind, artworks, refs]);
+  }, [brief, active, kind, artworks, refs, chosenModel]);
 
   const feedRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
@@ -173,11 +200,15 @@ export default function OfficePage() {
               DEMO MODE
             </span>
           )}
-          {status && !status.demo && <span className="tag-wood">{status.model}</span>}
           {run && <span className={`tag-wood phase-${run.phase}`}>{phaseLabel(run.phase)}</span>}
           {me && (
             <span className="tag-wood account" title={`ล็อกอินเป็น ${me.email}`}>
               <b>{me.role === "admin" ? "👑" : "👤"}</b> {me.email}
+              {me.role === "admin" && (
+                <button className="link-btn" onClick={() => setShowMembers(true)}>
+                  สมาชิก
+                </button>
+              )}
               <button
                 className="link-btn"
                 onClick={() => void fetch("/api/logout", { method: "POST" }).then(() => (window.location.href = "/login"))}
@@ -284,6 +315,18 @@ export default function OfficePage() {
                 แคมเปญ / คอนเทนต์
               </button>
             </div>
+            {status && status.models.length > 0 && (
+              <label className="model-pick">
+                <span>โมเดล AI</span>
+                <select value={chosenModel} onChange={(e) => pickModel(e.target.value)} disabled={active}>
+                  {status.models.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.label} · {m.note}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <p className="hint">
               {kind === "graphic"
                 ? "ได้ brief พร้อมส่งดีไซเนอร์: ข้อความบนชิ้นงาน สี layout และขนาด"
@@ -512,6 +555,7 @@ export default function OfficePage() {
 
       {selected && <AgentDrawer id={selected} run={run} onClose={() => setSelected(null)} onEdit={() => setCharEditor(selected)} />}
       {showMemory && <MemoryPanel onClose={() => setShowMemory(false)} />}
+      {showMembers && <MembersPanel onClose={() => setShowMembers(false)} />}
       {charEditor && <CharacterEditor initial={charEditor} onClose={() => setCharEditor(null)} />}
       {showFinal && run && <FinalModal run={run} onClose={() => setShowFinal(false)} />}
     </div>

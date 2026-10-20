@@ -38,10 +38,40 @@ function persist() {
   }
 }
 
+let shared = false;
+let pushTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Send the whole list to the team store (debounced: editing a note fires on every keystroke). */
+function pushShared() {
+  if (!shared) return;
+  if (pushTimer) clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => {
+    void fetch("/api/team", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ memory: items }) }).catch(() => undefined);
+  }, 700);
+}
+
 function set(next: MemoryItem[]) {
   items = next;
   persist();
+  pushShared();
   listeners.forEach((l) => l());
+}
+
+/** Use the team's shared notes when there is a shared store; the first browser to connect uploads what it has. */
+async function syncShared() {
+  try {
+    const res = await fetch("/api/team", { cache: "no-store" });
+    const data = (await res.json()) as { shared?: boolean; memory?: MemoryItem[] };
+    if (!data.shared) return;
+    shared = true;
+    if (data.memory?.length) {
+      items = data.memory.filter((m) => m && typeof m.text === "string");
+      persist();
+      listeners.forEach((l) => l());
+    } else if (items.length) pushShared();
+  } catch {
+    /* offline: keep this browser's copy */
+  }
 }
 
 export function loadMemory() {
@@ -58,6 +88,7 @@ export function loadMemory() {
     /* corrupt save: start empty */
   }
   listeners.forEach((l) => l());
+  void syncShared();
 }
 
 export const memory = {
