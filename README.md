@@ -92,3 +92,7 @@ Set `GEMINI_API_KEY` (and no Anthropic key, or `AI_PROVIDER=gemini`) in `.env.lo
 ## Reference links
 
 Under the brief box, **🔗 Reference** takes up to 6 links, each with a note. The server (`/api/reference`, `lib/reference.ts`) opens the link, turns the page into text and has the AI summarise it; the summary is editable and is appended to the brief as "Reference ที่ N", so the brief can say "ตาม Reference 1". Google Docs/Sheets/Slides and Drive links work when shared as "anyone with the link"; private/internal addresses, PDFs and images are not read. With the Gemini free tier the page text is sent to Google.
+
+## OmniRoute
+
+Set `OMNIROUTE_KEY` (and optionally `OMNIROUTE_MODEL`, e.g. a combo name) and the app talks to a local OmniRoute (`lib/omniroute.ts`, OpenAI-compatible `/v1/chat/completions`). OmniRoute can fall back between providers/models when a free quota runs out. Never commit `.env.local`.

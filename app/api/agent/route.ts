@@ -1,5 +1,6 @@
 import { claude, DEMO_MODE, EFFORT, MODEL, PROVIDER, USE_FALLBACKS, errorMessage } from "@/lib/claude";
 import { geminiStream } from "@/lib/gemini";
+import { omniStream } from "@/lib/omniroute";
 import { demoOutput } from "@/lib/demo";
 import { type AgentRequest, systemFor, userMessageFor } from "@/lib/prompts";
 
@@ -16,6 +17,7 @@ export async function POST(req: Request) {
       const send = (obj: object) => controller.enqueue(enc.encode(JSON.stringify(obj) + "\n"));
       try {
         if (DEMO_MODE) await runDemo(body, send);
+        else if (PROVIDER === "omniroute") await runOmni(body, send, req.signal);
         else if (PROVIDER === "gemini") await runGemini(body, send, req.signal);
         else await runClaude(body, send, req.signal);
         send({ type: "done" });
@@ -30,6 +32,13 @@ export async function POST(req: Request) {
   return new Response(stream, {
     headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" },
   });
+}
+
+async function runOmni(body: AgentRequest, send: (o: object) => void, signal: AbortSignal) {
+  const system = systemFor(body.mode === "compile" ? "director" : body.agentId, body.kind, body.names, body.mode === "chat", body.memory)
+    .map((b) => b.text)
+    .join("\n\n");
+  await omniStream({ system, user: userMessageFor(body), maxTokens: body.mode === "chat" ? 1500 : 16000, signal }, (text) => send({ type: "text", text }));
 }
 
 async function runGemini(body: AgentRequest, send: (o: object) => void, signal: AbortSignal) {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { type Plan, type PlanTask, type RunKind, WORKER_IDS } from "@/lib/agents";
 import { claude, DEMO_MODE, EFFORT, MODEL, PROVIDER, USE_FALLBACKS, errorMessage } from "@/lib/claude";
 import { geminiJson } from "@/lib/gemini";
+import { omniComplete } from "@/lib/omniroute";
 import { demoPlan } from "@/lib/demo";
 import { PLAN_SCHEMA, PLAN_SYSTEM, planPrompt } from "@/lib/prompts";
 
@@ -17,6 +18,16 @@ export async function POST(req: Request) {
   }
 
   try {
+    if (PROVIDER === "omniroute") {
+      const raw = await omniComplete({
+        system: PLAN_SYSTEM,
+        user: `${planPrompt(brief, kind, names)}\n\nตอบเป็น JSON เท่านั้น ตาม schema นี้:\n${JSON.stringify(PLAN_SCHEMA)}`,
+        maxTokens: 8000,
+        json: true,
+        signal: req.signal,
+      });
+      return NextResponse.json({ plan: sanitize(JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g, "")) as Plan) });
+    }
     if (PROVIDER === "gemini") {
       const text = await geminiJson({
         system: PLAN_SYSTEM,
